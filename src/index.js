@@ -24,13 +24,13 @@ submitBtn.addEventListener('click', evt => {
 async function onRequest() {
     onClearMarkup();
     try {
-        //await getRequest (page)
+        
         let resp = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${fieldSearch.value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`);
         Notify.success(`Hooray! We found ${resp.data.totalHits} images.`)
         
         let imagesMarkup = createMarkup(resp.data.hits);
         imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
-        let gallery = new SimpleLightbox(imgContainer.querySelectorAll('.gallery a'));
+        let gallery = new SimpleLightbox('.gallery a');
         btnNextRequest.style.visibility = 'visible';
         btnNextRequest.addEventListener('click', async event => {
             if (page < Math.ceil(resp.data.totalHits/per_page)){
@@ -38,7 +38,7 @@ async function onRequest() {
                 resp = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${fieldSearch.value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`);
                 imagesMarkup = createMarkup(resp.data.hits);
                 imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
-                gallery = new SimpleLightbox(imgContainer.querySelectorAll('.gallery a'));
+                gallery = new SimpleLightbox('.gallery a');
                 gallery.refresh();
                 smoothScroll ();
                 
@@ -66,4 +66,4 @@ function smoothScroll () {
         behavior: "smooth",
     }); 
 }
-index.js:48 Uncaught (in promise) refreshing only works when you initialize using a selector!
+
