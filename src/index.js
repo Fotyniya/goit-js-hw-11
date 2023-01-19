@@ -41,8 +41,7 @@ btnNextRequest.addEventListener('click', async event => {
         if (page < Math.ceil(total/per_page)){
             page += 1;
             await doRequest();
-            let imagesMarkup = createMarkup(data);
-            imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
+            addMarkup ();
             gallery.refresh();
             btnNextRequest.style.visibility = 'visible';
             smoothScroll ();
@@ -59,8 +58,7 @@ btnNextRequest.addEventListener('click', async event => {
 async function onRequest() {
     try {
         await doRequest();
-        let imagesMarkup = createMarkup(data);
-        imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
+        addMarkup ()
         gallery.refresh();
         btnNextRequest.style.visibility = 'visible';
         if (total > 0){
@@ -84,4 +82,9 @@ function smoothScroll () {
         top: cardHeight * 2,
         behavior: "smooth",
     }); 
+}
+
+function addMarkup () {
+    let imagesMarkup = createMarkup(data);
+    imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
 }
