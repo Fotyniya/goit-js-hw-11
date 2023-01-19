@@ -18,16 +18,9 @@ const imgContainer = document.querySelector('.gallery');
 const btnNextRequest = document.querySelector('.load-more');
 
 async function doRequest(){
-    try {
         let resp = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${fieldSearch.value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`);
         total = resp.data.totalHits;
         data = resp.data.hits;
-        if (total === 0){
-            throw new Error (resp.data.statusText);
-        }
-    } catch (error){
-        Notify.failure("Sorry, there are no images matching your search query. Please try again.")
-    }
 }
 
 fieldSearch.addEventListener('input', event => {
