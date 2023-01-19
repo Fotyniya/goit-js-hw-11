@@ -9,6 +9,7 @@ const BASE_URL = 'https://pixabay.com/api/';
 let page = 1;
 const per_page = 40;
 let total;
+let data;
 let gallery = new SimpleLightbox('.gallery a');
 
 const fieldSearch = document.querySelector('[name = searchQuery]');
@@ -17,17 +18,22 @@ const imgContainer = document.querySelector('.gallery');
 const btnNextRequest = document.querySelector('.load-more');
 
 async function doRequest(){
-    let resp = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${fieldSearch.value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`);
-    total = resp.data.totalHits;
-
-    let imagesMarkup = createMarkup(resp.data.hits);
-    imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
-    btnNextRequest.style.visibility = 'visible';
+    try {
+        let resp = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${fieldSearch.value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`);
+        total = resp.data.totalHits;
+        data = resp.data.hits;
+        if (total === 0){
+            throw new Error (resp.data.statusText);
+        }
+    } catch (error){
+        Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+    }
 }
 
 fieldSearch.addEventListener('input', event => {
     if (!fieldSearch.value){
         onClearMarkup();
+        btnNextRequest.style.visibility = 'hidden'; 
     }
 });
 
@@ -38,34 +44,45 @@ submitBtn.addEventListener('click', evt => {
 });
 
 btnNextRequest.addEventListener('click', async event => {
-    if (page < Math.ceil(total/per_page)){
-        page += 1;
-        gallery.refresh();
-        await doRequest();
-        smoothScroll ();
-    } else {
-        Notify.warning("We're sorry, but you've reached the end of search results.")
+    try {
+        if (page < Math.ceil(total/per_page)){
+            page += 1;
+            await doRequest();
+            let imagesMarkup = createMarkup(data);
+            imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
+            gallery.refresh();
+            btnNextRequest.style.visibility = 'visible';
+            smoothScroll ();
+        } else {
+            Notify.warning("We're sorry, but you've reached the end of search results.")
+            btnNextRequest.style.visibility = 'hidden';
+        }
+    } catch (error) {
         btnNextRequest.style.visibility = 'hidden';
-    } 
+        Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+    }  
 });
 
 async function onRequest() {
-    onClearMarkup();
     try {
-        await doRequest()
+        await doRequest();
+        let imagesMarkup = createMarkup(data);
+        imgContainer.insertAdjacentHTML('beforeEnd', imagesMarkup);
+        gallery.refresh();
+        btnNextRequest.style.visibility = 'visible';
         if (total > 0){
             Notify.success(`Hooray! We found ${total} images.`)
         } else {
             throw new Error (resp.data.statusText);
         }
     } catch (error) {
+        btnNextRequest.style.visibility = 'hidden';
         Notify.failure("Sorry, there are no images matching your search query. Please try again.")
     }   
 }
 
 function onClearMarkup() {
-    imgContainer.innerHTML = "";  
-    btnNextRequest.style.visibility = 'hidden';  
+    imgContainer.innerHTML = "";   
 }
 
 function smoothScroll () {
